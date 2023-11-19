@@ -1,9 +1,9 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
 const bcrypt = require("bcrypt");
-const Order = require("./Order");
-const Review = require("./Review");
-const Wishlist = require("./Wishlist");
+const Order = require("./Order.model");
+const Review = require("./Review.model");
+const Wishlist = require("./Wishlist.model");
 const ShippingAddress = require("./ShippingAddress");
 
 const User = sequelize.define("User", {

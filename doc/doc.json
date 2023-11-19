@@ -1,0 +1,326 @@
+{
+    "users": [
+        {
+            "id": 1,
+            "username": "john_doe",
+            "email": "john.doe@example.com",
+            "password": "hashed_password",
+            "firstName": "John",
+            "lastName": "Doe",
+            "isAdmin": false,
+            "shippingAddresses": [
+                {
+                    "id": 1,
+                    "streetAddress": "123 Main St",
+                    "city": "Cityville",
+                    "state": "Stateville",
+                    "zipCode": "12345",
+                    "country": "Countryland",
+                    "isDefault": true
+                }
+            ],
+            "wishlists": [
+                {
+                    "id": 1,
+                    "dateAdded": "2023-01-01",
+                    "products": [
+                        {
+                            "id": 1,
+                            "name": "Product A",
+                            "description": "Description for Product A",
+                            "price": 29.99
+                        },
+                        {
+                            "id": 2,
+                            "name": "Product B",
+                            "description": "Description for Product B",
+                            "price": 39.99
+                        }
+                    ]
+                }
+            ],
+            "orders": [
+                {
+                    "id": 1,
+                    "orderDate": "2023-01-15",
+                    "totalAmount": 69.98,
+                    "orderStatus": "Shipped",
+                    "orderItems": [
+                        {
+                            "id": 1,
+                            "quantity": 2,
+                            "subtotal": 59.98,
+                            "product": {
+                                "id": 1,
+                                "name": "Product A",
+                                "description": "Description for Product A",
+                                "price": 29.99
+                            }
+                        }
+                    ],
+                    "payment": {
+                        "id": 1,
+                        "paymentDate": "2023-01-15",
+                        "paymentMethod": "Credit Card",
+                        "amount": 69.98,
+                        "status": "Paid"
+                    },
+                    "transaction": {
+                        "id": 1,
+                        "transactionDate": "2023-01-15",
+                        "amount": 69.98,
+                        "status": "Success"
+                    }
+                }
+            ]
+        }
+    ],
+    "categories": [
+        {
+            "id": 1,
+            "categoryName": "Electronics",
+            "description": "Electronic Devices and Gadgets"
+        },
+        {
+            "id": 2,
+            "categoryName": "Clothing",
+            "description": "Fashion and Apparel"
+        }
+    ],
+    "manufacturers": [
+        {
+            "id": 1,
+            "manufacturerName": "TechCo",
+            "description": "Technology Company"
+        },
+        {
+            "id": 2,
+            "manufacturerName": "FashionCorp",
+            "description": "Fashion Corporation"
+        }
+    ],
+    "products": [
+        {
+            "id": 1,
+            "name": "Product A",
+            "description": "Description for Product A",
+            "price": 29.99,
+            "stockQuantity": 100,
+            "category": {
+                "id": 1,
+                "categoryName": "Electronics",
+                "description": "Electronic Devices and Gadgets"
+            },
+            "manufacturer": {
+                "id": 1,
+                "manufacturerName": "TechCo",
+                "description": "Technology Company"
+            },
+            "reviews": [
+                {
+                    "id": 1,
+                    "rating": 4,
+                    "comment": "Great product!",
+                    "date": "2023-01-10",
+                    "user": {
+                        "id": 1,
+                        "username": "john_doe"
+                    }
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "name": "Product B",
+            "description": "Description for Product B",
+            "price": 39.99,
+            "stockQuantity": 50,
+            "category": {
+                "id": 2,
+                "categoryName": "Clothing",
+                "description": "Fashion and Apparel"
+            },
+            "manufacturer": {
+                "id": 2,
+                "manufacturerName": "FashionCorp",
+                "description": "Fashion Corporation"
+            },
+            "reviews": [
+                {
+                    "id": 2,
+                    "rating": 5,
+                    "comment": "Love it!",
+                    "date": "2023-01-12",
+                    "user": {
+                        "id": 1,
+                        "username": "john_doe"
+                    }
+                }
+            ]
+        }
+    ],
+    "coupons": [
+        {
+            "id": 1,
+            "code": "DISCOUNT10",
+            "discountPercentage": 10,
+            "expiryDate": "2023-02-28",
+            "usageLimit": 100,
+            "orders": [
+                {
+                    "id": 1,
+                    "orderDate": "2023-01-15",
+                    "totalAmount": 69.98,
+                    "orderStatus": "Shipped"
+                }
+            ]
+        }
+    ],
+    "shippingAddresses": [
+        {
+            "id": 1,
+            "streetAddress": "123 Main St",
+            "city": "Cityville",
+            "state": "Stateville",
+            "zipCode": "12345",
+            "country": "Countryland",
+            "isDefault": true,
+            "user": {
+                "id": 1,
+                "username": "john_doe"
+            }
+        }
+    ],
+    "reviews": [
+        {
+            "id": 1,
+            "rating": 4,
+            "comment": "Great product!",
+            "date": "2023-01-10",
+            "user": {
+                "id": 1,
+                "username": "john_doe"
+            },
+            "product": {
+                "id": 1,
+                "name": "Product A"
+            }
+        },
+        {
+            "id": 2,
+            "rating": 5,
+            "comment": "Love it!",
+            "date": "2023-01-12",
+            "user": {
+                "id": 1,
+                "username": "john_doe"
+            },
+            "product": {
+                "id": 2,
+                "name": "Product B"
+            }
+        }
+    ],
+    "wishlists": [
+        {
+            "id": 1,
+            "dateAdded": "2023-01-01",
+            "products": [
+                {
+                    "id": 1,
+                    "name": "Product A",
+                    "description": "Description for Product A",
+                    "price": 29.99
+                },
+                {
+                    "id": 2,
+                    "name": "Product B",
+                    "description": "Description for Product B",
+                    "price": 39.99
+                }
+            ],
+            "user": {
+                "id": 1,
+                "username": "john_doe"
+            }
+        }
+    ],
+    "orders": [
+        {
+            "id": 2,
+            "orderDate": "2023-02-01",
+            "totalAmount": 49.99,
+            "orderStatus": "Processing",
+            "orderItems": [
+                {
+                    "id": 2,
+                    "quantity": 1,
+                    "subtotal": 49.99,
+                    "product": {
+                        "id": 2,
+                        "name": "Product B",
+                        "description": "Description for Product B",
+                        "price": 39.99
+                    }
+                }
+            ],
+            "payment": {
+                "id": 2,
+                "paymentDate": "2023-02-01",
+                "paymentMethod": "PayPal",
+                "amount": 49.99,
+                "status": "Pending"
+            },
+            "transaction": null,
+            "coupon": null
+        }
+    ],
+    "transactions": [
+        {
+            "id": 1,
+            "transactionDate": "2023-01-15",
+            "amount": 69.98,
+            "status": "Success",
+            "order": {
+                "id": 1,
+                "orderDate": "2023-01-15",
+                "totalAmount": 69.98,
+                "orderStatus": "Shipped"
+            }
+        }
+    ],
+    "payments": [
+        {
+            "id": 3,
+            "paymentDate": "2023-02-15",
+            "paymentMethod": "Credit Card",
+            "amount": 49.99,
+            "status": "Paid",
+            "order": {
+                "id": 2,
+                "orderDate": "2023-02-01",
+                "totalAmount": 49.99,
+                "orderStatus": "Processing"
+            }
+        }
+    ],
+    "orderItems": [
+        {
+            "id": 3,
+            "quantity": 2,
+            "subtotal": 79.98,
+            "product": {
+                "id": 1,
+                "name": "Product A",
+                "description": "Description for Product A",
+                "price": 29.99
+            },
+            "order": {
+                "id": 2,
+                "orderDate": "2023-02-01",
+                "totalAmount": 49.99,
+                "orderStatus": "Processing"
+            }
+        }
+    ]
+}
