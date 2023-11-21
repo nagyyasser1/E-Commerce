@@ -1,0 +1,7 @@
+2023/11/21 12:57:00	eee9a7e6-cea2-4c42-9ce7-9e3efb8185bc	RangeError: Invalid status code: undefined	POST	/api/category	undefined
+2023/11/21 14:08:40	0bf8d4dd-0622-4e23-a420-c5d490eddf55	TypeError: Cannot read properties of undefined (reading 'Coupon')	GET	/api/coupon	undefined
+2023/11/21 14:08:52	9efec81b-83f9-4bec-b212-a169ea55fafe	RangeError: Invalid status code: undefined	GET	/api/coupon	undefined
+2023/11/21 15:37:52	11697307-c81e-43b3-94a7-24e633120260	TypeError: Cannot read properties of undefined (reading 'id')	POST	/api/shippingaddress	undefined
+2023/11/21 15:38:14	b9180bda-9ec4-4e27-b1a6-f1b669296281	ReferenceError: STATUS_CODES is not defined	POST	/api/shippingaddress	undefined
+2023/11/21 15:38:58	5ee469e3-f262-4277-8d36-f3ae9a3c02f4	ReferenceError: STATUS_CODES is not defined	POST	/api/shippingaddress	undefined
+2023/11/21 15:39:49	19f2d83d-2a91-4d43-bc5f-064fc8021727	ReferenceError: STATUS_CODES is not defined	POST	/api/shippingaddress	undefined

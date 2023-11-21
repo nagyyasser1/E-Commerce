@@ -1,43 +1,61 @@
-const User = require("../models/User");
+const db = require("../models");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const asyncHandler = require("express-async-handler");
+const STATUS_CODES = require("../utils/STATUS_CODES");
 
 // @desc Login
 // @route POST /auth
 // @access Public
 const login = asyncHandler(async (req, res) => {
-  const { username, password } = req.body;
+  const { email, password } = req.body;
 
-  if (!username || !password) {
-    return res.status(400).json({ message: "All fields are required" });
+  if (!email || !password) {
+    return res
+      .status(STATUS_CODES.BAD_REQUEST)
+      .json({ message: "All fields are required" });
   }
 
-  const foundUser = await User.findOne({ username }).exec();
+  // Check for existence email
+  const foundUser = await db.User.findOne({
+    where: {
+      email: email,
+    },
+  });
 
-  if (!foundUser || !foundUser.active) {
-    return res.status(401).json({ message: "Unauthorized" });
+  if (!foundUser) {
+    return res
+      .status(STATUS_CODES.UNAUTHORIZED)
+      .json({ message: "Unauthorized" });
   }
 
   const match = await bcrypt.compare(password, foundUser.password);
 
-  if (!match) return res.status(401).json({ message: "Unauthorized" });
+  if (!match)
+    return res
+      .status(STATUS_CODES.UNAUTHORIZED)
+      .json({ message: "Unauthorized" });
 
   const accessToken = jwt.sign(
     {
-      UserInfo: {
-        username: foundUser.username,
-        roles: foundUser.roles,
-      },
+      username: foundUser.username,
+      email: foundUser.email,
+      id: foundUser.id,
+      isAdmin: foundUser.isAdmin,
     },
     process.env.ACCESS_TOKEN_SECRET,
-    { expiresIn: "15m" }
+    { expiresIn: "1d" }
   );
 
   const refreshToken = jwt.sign(
-    { username: foundUser.username },
+    {
+      username: foundUser.username,
+      email: foundUser.email,
+      id: foundUser.id,
+      isAdmin: foundUser.isAdmin,
+    },
     process.env.REFRESH_TOKEN_SECRET,
-    { expiresIn: "7d" }
+    { expiresIn: "20d" }
   );
 
   // Create secure cookie with refresh token
@@ -48,7 +66,7 @@ const login = asyncHandler(async (req, res) => {
     maxAge: 7 * 24 * 60 * 60 * 1000, //cookie expiry: set to match rT
   });
 
-  // Send accessToken containing username and roles
+  // Send accessToken containing username , email , id
   res.json({ accessToken });
 });
 
@@ -58,7 +76,10 @@ const login = asyncHandler(async (req, res) => {
 const refresh = (req, res) => {
   const cookies = req.cookies;
 
-  if (!cookies?.jwt) return res.status(401).json({ message: "Unauthorized" });
+  if (!cookies?.jwt)
+    return res
+      .status(STATUS_CODES.UNAUTHORIZED)
+      .json({ message: "Unauthorized" });
 
   const refreshToken = cookies.jwt;
 
@@ -66,23 +87,31 @@ const refresh = (req, res) => {
     refreshToken,
     process.env.REFRESH_TOKEN_SECRET,
     asyncHandler(async (err, decoded) => {
-      if (err) return res.status(403).json({ message: "Forbidden" });
+      if (err)
+        return res
+          .status(STATUS_CODES.FORBIDDEN)
+          .json({ message: "Forbidden" });
 
-      const foundUser = await User.findOne({
-        username: decoded.username,
-      }).exec();
+      const foundUser = await db.User.findOne({
+        where: {
+          email: email,
+        },
+      });
 
-      if (!foundUser) return res.status(401).json({ message: "Unauthorized" });
+      if (!foundUser)
+        return res
+          .status(STATUS_CODES.UNAUTHORIZED)
+          .json({ message: "Unauthorized" });
 
       const accessToken = jwt.sign(
         {
-          UserInfo: {
-            username: foundUser.username,
-            roles: foundUser.roles,
-          },
+          username: foundUser.username,
+          email: foundUser.email,
+          id: foundUser.id,
+          isAdmin: foundUser.isAdmin,
         },
         process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: "15m" }
+        { expiresIn: "1d" }
       );
 
       res.json({ accessToken });
@@ -95,7 +124,7 @@ const refresh = (req, res) => {
 // @access Public - just to clear cookie if exists
 const logout = (req, res) => {
   const cookies = req.cookies;
-  if (!cookies?.jwt) return res.sendStatus(204); //No content
+  if (!cookies?.jwt) return res.sendStatus(STATUS_CODES.NO_CONTENT); //No content
   res.clearCookie("jwt", { httpOnly: true, sameSite: "None", secure: true });
   res.json({ message: "Cookie cleared" });
 };
