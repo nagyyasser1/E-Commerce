@@ -23,9 +23,8 @@ module.exports = (sequelize, DataTypes) => {
     },
     imageUrl: {
       type: DataTypes.STRING,
-      validate: {
-        isUrl: true,
-      },
+      defaultValue:
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQEBakJ16ebRr5fDkbjt40Bm_lU3-5MRNKAidY1E8Yc93BRcLQVa32sHPKad19rya_7AkY&usqp=CAU",
     },
     createdAt: {
       type: DataTypes.DATE,

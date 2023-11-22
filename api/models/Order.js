@@ -17,6 +17,7 @@ module.exports = (sequelize, DataTypes) => {
     orderStatus: {
       type: DataTypes.STRING,
       allowNull: false,
+      defaultValue: "Pending",
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -31,8 +32,6 @@ module.exports = (sequelize, DataTypes) => {
   Order.associate = (models) => {
     Order.belongsTo(models.User, { foreignKey: "userId" });
     Order.hasMany(models.OrderItem, { foreignKey: "orderId" });
-    Order.hasOne(models.Payment, { foreignKey: "orderId" });
-    Order.hasOne(models.Transaction, { foreignKey: "orderId" });
   };
 
   return Order;

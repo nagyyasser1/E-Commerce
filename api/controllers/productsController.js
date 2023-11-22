@@ -1,6 +1,8 @@
 const db = require("../models");
 const asyncHandler = require("express-async-handler");
 const STATUS_CODES = require("../utils/STATUS_CODES");
+const deleteFile = require("../utils/deleteFile");
+const path = require("path");
 
 // @desc Add New product
 // @route /product
@@ -11,15 +13,26 @@ const addProduct = asyncHandler(async (req, res) => {
     description,
     price,
     stockQuantity,
-    imageUrl,
     categoryId,
     manufacturerId,
   } = req.body;
 
-  if (!name || !price || !stockQuantity || !categoryId || !manufacturerId) {
+  // Assuming that the file path is available in req.file.path
+  const filePath = req?.file?.path;
+  console.log(filePath);
+
+  if (
+    !name ||
+    !price ||
+    !stockQuantity ||
+    !categoryId ||
+    !manufacturerId ||
+    !filePath
+  ) {
+    await deleteFile(filePath);
     return res.status(STATUS_CODES.BAD_REQUEST).json({
       message:
-        "Name, price, stockQuantity, categoryId, and manufacturerId are required!",
+        "Name, price, stockQuantity, categoryId, file and manufacturerId are required!",
     });
   }
 
@@ -27,6 +40,7 @@ const addProduct = asyncHandler(async (req, res) => {
     // Check if the specified category exists
     const category = await db.Category.findByPk(categoryId);
     if (!category) {
+      await deleteFile(filePath);
       return res
         .status(STATUS_CODES.NOT_FOUND)
         .json({ message: "Category not found" });
@@ -35,6 +49,7 @@ const addProduct = asyncHandler(async (req, res) => {
     // Check if the specified manufacturer exists
     const manufacturer = await db.Manufacturer.findByPk(manufacturerId);
     if (!manufacturer) {
+      await deleteFile(filePath);
       return res
         .status(STATUS_CODES.NOT_FOUND)
         .json({ message: "Manufacturer not found" });
@@ -46,7 +61,7 @@ const addProduct = asyncHandler(async (req, res) => {
       description,
       price,
       stockQuantity,
-      imageUrl,
+      imageUrl: path.basename(filePath),
       categoryId,
       manufacturerId,
     });
@@ -55,6 +70,7 @@ const addProduct = asyncHandler(async (req, res) => {
       .status(STATUS_CODES.CREATED)
       .json({ message: "Product added successfully", product: newProduct });
   } catch (error) {
+    await deleteFile(filePath);
     console.error("Error adding new product:", error);
     return res
       .status(STATUS_CODES.SERVER_ERROR)

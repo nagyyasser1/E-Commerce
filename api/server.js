@@ -16,7 +16,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use("/", express.static(path.join(__dirname, "public")));
+app.use("/", express.static(path.join(__dirname, "uploads")));
 app.use("/", require("./routes/route"));
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/users", require("./routes/userRoutes"));
@@ -26,6 +26,8 @@ app.use("/api/product", require("./routes/productRoutes"));
 app.use("/api/coupon", require("./routes/couponRoutes"));
 app.use("/api/shippingaddress", require("./routes/shippingAddressRoutes"));
 app.use("/api/review", require("./routes/reviewRoutes"));
+app.use("/api/order", require("./routes/orderRoutes"));
+app.use("/api/wishlist", require("./routes/wishlistRoutes"));
 
 app.all("*", (req, res, next) => {
   res.status(404);
