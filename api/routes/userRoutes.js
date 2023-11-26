@@ -7,8 +7,10 @@ const isAdmin = require("../middlewares/isAdmin");
 router.post("/", usersController.createNewUser);
 router.get("/", isAdmin, usersController.getAllUsers);
 router.get("/:userId", verifyJWT, usersController.getUserById);
+router.post("/send-verification-token", usersController.sendEmailVerification);
+router.get("/verify-email/:token", usersController.verifyEmail);
 
-router.use(verifyJWT);
+router.use(isAdmin);
 router
   .route("/")
   .patch(usersController.updateUser)

@@ -56,6 +56,36 @@ const addProductToWishlist = asyncHandler(async (req, res) => {
   }
 });
 
+//
+const getWishlist = asyncHandler(async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    // Find the wishlist associated with the user
+    const wishlist = await db.Wishlist.findOne({
+      where: { userId },
+      include: [db.Product], // Include associated products in the query
+    });
+
+    if (!wishlist) {
+      return res
+        .status(STATUS_CODES.NOT_FOUND)
+        .json({ message: "Wishlist not found for the user" });
+    }
+
+    res.status(STATUS_CODES.SUCCESS).json({
+      message: "Wishlist retrieved successfully",
+      wishlist,
+    });
+  } catch (error) {
+    console.error("Error retrieving wishlist:", error);
+    res
+      .status(STATUS_CODES.SERVER_ERROR)
+      .json({ message: "Internal Server Error" });
+  }
+});
+
 module.exports = {
   addProductToWishlist,
+  getWishlist,
 };

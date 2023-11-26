@@ -1,13 +1,12 @@
 const db = require("../models");
 const asyncHandler = require("express-async-handler");
 const STATUS_CODES = require("../utils/STATUS_CODES");
-const deleteFile = require("../utils/deleteFile");
 const path = require("path");
 
 // @desc Add New product
 // @route /product
 // @access Privit
-const addProduct = asyncHandler(async (req, res) => {
+const addProduct = asyncHandler(async (req, res, next) => {
   const {
     name,
     description,
@@ -17,19 +16,7 @@ const addProduct = asyncHandler(async (req, res) => {
     manufacturerId,
   } = req.body;
 
-  // Assuming that the file path is available in req.file.path
-  const filePath = req?.file?.path;
-  console.log(filePath);
-
-  if (
-    !name ||
-    !price ||
-    !stockQuantity ||
-    !categoryId ||
-    !manufacturerId ||
-    !filePath
-  ) {
-    await deleteFile(filePath);
+  if (!name || !price || !stockQuantity || !categoryId || !manufacturerId) {
     return res.status(STATUS_CODES.BAD_REQUEST).json({
       message:
         "Name, price, stockQuantity, categoryId, file and manufacturerId are required!",
@@ -40,7 +27,6 @@ const addProduct = asyncHandler(async (req, res) => {
     // Check if the specified category exists
     const category = await db.Category.findByPk(categoryId);
     if (!category) {
-      await deleteFile(filePath);
       return res
         .status(STATUS_CODES.NOT_FOUND)
         .json({ message: "Category not found" });
@@ -49,28 +35,24 @@ const addProduct = asyncHandler(async (req, res) => {
     // Check if the specified manufacturer exists
     const manufacturer = await db.Manufacturer.findByPk(manufacturerId);
     if (!manufacturer) {
-      await deleteFile(filePath);
       return res
         .status(STATUS_CODES.NOT_FOUND)
         .json({ message: "Manufacturer not found" });
     }
 
-    // Create a new product with associations
+    // Build a new product instance without saving it
     const newProduct = await db.Product.create({
       name,
       description,
       price,
       stockQuantity,
-      imageUrl: path.basename(filePath),
       categoryId,
       manufacturerId,
     });
 
-    return res
-      .status(STATUS_CODES.CREATED)
-      .json({ message: "Product added successfully", product: newProduct });
+    req.newProduct = newProduct;
+    next();
   } catch (error) {
-    await deleteFile(filePath);
     console.error("Error adding new product:", error);
     return res
       .status(STATUS_CODES.SERVER_ERROR)
@@ -78,18 +60,72 @@ const addProduct = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc Get all products
+// @desc saves files about product
 // @route /product
 // @access Privit
+const saveFiles = asyncHandler(async (req, res) => {
+  try {
+    const files = req.files;
+    const productId = req.newProduct.id;
+
+    const promises = Object.keys(files).map(async (key) => {
+      const filepath = path.join(
+        __dirname,
+        "../uploads",
+        productId + files[key].name
+      );
+
+      return new Promise((resolve, reject) => {
+        files[key].mv(filepath, async (err) => {
+          if (err) {
+            console.error(`Error saving file ${files[key].name}:`, err);
+            reject({ file: files[key].name, error: err });
+          } else {
+            await db.ProductImage.create({
+              imageUrl: productId + files[key].name,
+              productId,
+            });
+            resolve();
+          }
+        });
+      });
+    });
+
+    await Promise.all(promises);
+
+    return res
+      .status(STATUS_CODES.CREATED)
+      .json({ message: "Product added successfully", product: req.newProduct });
+  } catch (error) {
+    console.error("Error saving files:", error);
+    return res
+      .status(STATUS_CODES.SERVER_ERROR)
+      .json({ message: "Error saving files", error });
+  }
+});
+
+// @desc Get all products
+// @route /product
+// @access Public
 const getAllProducts = asyncHandler(async (req, res) => {
   try {
-    // Get all products and include associated fields (category and manufacturer)
+    // Get page and pageSize from the request query, default to 1 and 10 if not provided
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.pageSize) || 10;
+
+    // Calculate the offset based on the page and pageSize
+    const offset = (page - 1) * pageSize;
+
+    // Get all products with pagination and include associated fields (category, manufacturer, and reviews)
     const products = await db.Product.findAll({
       include: [
         { model: db.Category, as: "Category" },
         { model: db.Manufacturer, as: "Manufacturer" },
         { model: db.Review, as: "Reviews" },
+        { model: db.ProductImage, as: "ProductImages" },
       ],
+      offset,
+      limit: pageSize,
     });
 
     return res.status(STATUS_CODES.SUCCESS).json({ products });
@@ -101,7 +137,51 @@ const getAllProducts = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc Get one product
+// @route /product/:productId
+// @access Public
+const getProductById = asyncHandler(async (req, res) => {
+  const productId = req.params.productId;
+
+  try {
+    // Find the product by ID
+    const product = await db.Product.findByPk(productId, {
+      include: [
+        {
+          model: db.Category,
+          as: "Category",
+        },
+        {
+          model: db.Manufacturer,
+          as: "Manufacturer",
+        },
+        {
+          model: db.Review,
+          as: "Reviews",
+        },
+        { model: db.ProductImage, as: "ProductImages" },
+      ],
+    });
+
+    // Check if the product exists
+    if (!product) {
+      return res.status(STATUS_CODES.NOT_FOUND).json({
+        message: "Product not found",
+      });
+    }
+
+    return res.status(STATUS_CODES.SUCCESS).send(product);
+  } catch (error) {
+    console.error("Error getting product by ID:", error);
+    return res
+      .status(STATUS_CODES.SERVER_ERROR)
+      .json({ message: "Internal Server Error" });
+  }
+});
+
 module.exports = {
   addProduct,
   getAllProducts,
+  getProductById,
+  saveFiles,
 };

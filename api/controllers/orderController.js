@@ -116,10 +116,201 @@ const addOrder = asyncHandler(async (req, res) => {
   }
 });
 
-module.exports = {
-  addOrder,
-};
+const updateOrderStatus = asyncHandler(async (req, res) => {
+  const { status, orderId } = req.body;
+
+  try {
+    // Find the order by ID
+    const order = await db.Order.findByPk(orderId);
+
+    // If the order doesn't exist
+    if (!order) {
+      return res
+        .status(STATUS_CODES.NOT_FOUND)
+        .json({ message: "Order not found" });
+    }
+
+    // Update the status field
+    order.orderStatus = status;
+
+    // Save the changes to the database
+    await order.save();
+
+    return res.status(STATUS_CODES.SUCCESS).json({
+      message: "Order status updated successfully",
+      order,
+    });
+  } catch (error) {
+    console.error("Error updating order status:", error);
+    return res
+      .status(STATUS_CODES.SERVER_ERROR)
+      .json({ message: "Internal Server Error" });
+  }
+});
+
+const getAllOrders = asyncHandler(async (req, res) => {
+  try {
+    // Find all orders and include associated data (e.g., order items)
+    const orders = await db.Order.findAll({
+      include: [
+        {
+          model: db.OrderItem,
+          include: [db.Product],
+        },
+        db.User, // Include associated user
+      ],
+    });
+
+    return res.status(STATUS_CODES.SUCCESS).json({
+      message: "Orders retrieved successfully",
+      orders,
+    });
+  } catch (error) {
+    console.error("Error getting all orders:", error);
+    return res
+      .status(STATUS_CODES.SERVER_ERROR)
+      .json({ message: "Internal Server Error" });
+  }
+});
+
+const getMyOrders = asyncHandler(async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    // Find all orders associated with the user
+    const orders = await db.Order.findAll({
+      where: { userId },
+      include: [db.OrderItem], // Include associated order items in the query
+    });
+
+    if (!orders || orders.length === 0) {
+      return res
+        .status(STATUS_CODES.NOT_FOUND)
+        .json({ message: "No orders found for the user" });
+    }
+
+    res.status(STATUS_CODES.SUCCESS).json({
+      message: "Orders retrieved successfully",
+      orders,
+    });
+  } catch (error) {
+    console.error("Error retrieving orders:", error);
+    res
+      .status(STATUS_CODES.SERVER_ERROR)
+      .json({ message: "Internal Server Error" });
+  }
+});
+
+const deleteOrder = asyncHandler(async (req, res) => {
+  const orderId = req.body.orderId;
+  const userId = req.user.id;
+
+  try {
+    // Find the order
+    const order = await db.Order.findOne({
+      where: { id: orderId },
+    });
+
+    // If the order is not found
+    if (!order) {
+      return res
+        .status(STATUS_CODES.NOT_FOUND)
+        .json({ message: "Order not found" });
+    }
+
+    // Check if the user is the owner of the order or isAdmin
+    // ()
+    if (order.userId !== userId && !req.user.isAdmin) {
+      return res
+        .status(STATUS_CODES.UNAUTHORIZED)
+        .json({ message: "Unauthorized to delete this order" });
+    }
+
+    // Delete the order
+    await order.destroy();
+
+    res.status(STATUS_CODES.SUCCESS).json({
+      message: "Order deleted successfully",
+    });
+  } catch (error) {
+    console.error("Error deleting order:", error);
+    res
+      .status(STATUS_CODES.SERVER_ERROR)
+      .json({ message: "Internal Server Error" });
+  }
+});
+
+// Function to cancel an order
+const cancelOrder = asyncHandler(async (req, res) => {
+  const orderId = req.params.orderId;
+  const userId = req.user.id;
+
+  try {
+    // Find the order
+    const order = await db.Order.findOne({
+      where: {
+        id: orderId,
+        userId,
+      },
+      include: [
+        {
+          model: db.OrderItem,
+          as: "OrderItems",
+          include: [
+            {
+              model: db.Product,
+              as: "Product",
+            },
+          ],
+        },
+      ],
+    });
+
+    // Check if order and order.orderItems exist
+    if (!order || !order?.OrderItems) {
+      return res.status(STATUS_CODES.NOT_FOUND).json({
+        message: "Order not found",
+      });
+    }
+
+    // Restock products and delete order items
+    await db.sequelize.transaction(async (t) => {
+      for (const orderItem of order.OrderItems) {
+        if (orderItem.Product) {
+          const { Product: product, quantity } = orderItem;
+
+          // Restock product quantity
+          await db.Product.increment("stockQuantity", {
+            by: quantity,
+            where: { id: product.id },
+            transaction: t,
+          });
+        }
+
+        // Delete order item
+        await orderItem.destroy({ transaction: t });
+      }
+
+      // Delete the order
+      await order.destroy({ transaction: t });
+    });
+
+    return res.status(STATUS_CODES.SUCCESS).json({
+      message: "Order canceled successfully",
+    });
+  } catch (error) {
+    console.error("Error canceling order:", error);
+    return res
+      .status(STATUS_CODES.SERVER_ERROR)
+      .json({ message: "Internal Server Error" });
+  }
+});
 
 module.exports = {
   addOrder,
+  updateOrderStatus,
+  getAllOrders,
+  getMyOrders,
+  deleteOrder,
+  cancelOrder,
 };

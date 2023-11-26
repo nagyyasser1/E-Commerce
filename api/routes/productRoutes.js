@@ -1,24 +1,23 @@
 const router = require("express").Router();
 const isAdmin = require("../middlewares/isAdmin");
 const productsController = require("../controllers/productsController");
-const multer = require("multer");
+const fileUpload = require("express-fileupload");
+const filePayloadExists = require("../middlewares/filesPayloadExists");
+const fileSizeLimiter = require("../middlewares/fileSizeLimiter");
+const fileExtLimiter = require("../middlewares/fileExtLimiter");
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "./uploads");
-  },
-  filename: function (req, file, cb) {
-    const originalname = file.originalname;
-    const ext = originalname.substring(originalname.lastIndexOf("."));
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + ext);
-  },
-});
-
-const upload = multer({ storage: storage });
-
-// router.use(isAdmin);
-router.post("/", upload.single("avatar"), productsController.addProduct);
 router.get("/", productsController.getAllProducts);
+router.get("/:productId", productsController.getProductById);
+
+router.post(
+  "/",
+  // isAdmin,
+  fileUpload({ createParentPath: true }),
+  filePayloadExists,
+  fileExtLimiter([".png", ".jpg", ".jpeg"]),
+  fileSizeLimiter,
+  productsController.addProduct,
+  productsController.saveFiles
+);
 
 module.exports = router;

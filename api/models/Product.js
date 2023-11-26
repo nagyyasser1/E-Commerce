@@ -21,11 +21,6 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    imageUrl: {
-      type: DataTypes.STRING,
-      defaultValue:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQEBakJ16ebRr5fDkbjt40Bm_lU3-5MRNKAidY1E8Yc93BRcLQVa32sHPKad19rya_7AkY&usqp=CAU",
-    },
     createdAt: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
@@ -44,6 +39,7 @@ module.exports = (sequelize, DataTypes) => {
       through: "WishlistProducts",
       foreignKey: "productId",
     });
+    Product.hasMany(models.ProductImage, { foreignKey: "productId" });
   };
 
   return Product;

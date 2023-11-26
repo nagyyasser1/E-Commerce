@@ -8,11 +8,6 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true,
       allowNull: false,
     },
-    username: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
-    },
     email: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -38,6 +33,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
     },
     isAdmin: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    verified: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },

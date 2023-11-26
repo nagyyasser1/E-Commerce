@@ -1,6 +1,8 @@
 const db = require("../models");
 const asyncHandler = require("express-async-handler");
 const STATUS_CODES = require("../utils/STATUS_CODES");
+const transporter = require("../config/transporter");
+const jwt = require("jsonwebtoken");
 
 // @desc Get all users
 // @route GET /users
@@ -135,69 +137,128 @@ const createNewUser = asyncHandler(async (req, res) => {
 // @route PATCH /users
 // @access Private
 const updateUser = asyncHandler(async (req, res) => {
-  //   const { id, username, roles, active, password } = req.body;
-  // Confirm data
-  //   if (
-  //     !id ||
-  //     !username ||
-  //     !Array.isArray(roles) ||
-  //     !roles.length ||
-  //     typeof active !== "boolean"
-  //   ) {
-  //     return res
-  //       .status(400)
-  //       .json({ message: "All fields except password are required" });
-  //   }
-  // Does the user exist to update?
-  //   const user = await User.findById(id).exec();
-  //   if (!user) {
-  //     return res.status(400).json({ message: "User not found" });
-  //   }
-  // Check for duplicate
-  //   const duplicate = await User.findOne({ username }).lean().exec();
-  // Allow updates to the original user
-  //   if (duplicate && duplicate?._id.toString() !== id) {
-  //     return res.status(409).json({ message: "Duplicate username" });
-  //   }
-  //   user.username = username;
-  //   user.roles = roles;
-  //   user.active = active;
-  //   if (password) {
-  // Hash password
-  //     user.password = await bcrypt.hash(password, 10); // salt rounds
-  //   }
-  //   const updatedUser = await user.save();
-  //   res.json({ message: `${updatedUser.username} updated` });
+  const { userId, isAdmin } = req.body;
+
+  try {
+    if (typeof isAdmin !== "boolean") {
+      return res
+        .status(STATUS_CODES.BAD_REQUEST)
+        .json({ message: "isAdmin must be of type boolean." });
+    }
+    // Find the user by ID
+    const user = await db.User.findByPk(userId);
+
+    // If no user found
+    if (!user) {
+      return res
+        .status(STATUS_CODES.NOT_FOUND)
+        .json({ message: "User not found" });
+    }
+
+    // Update user role
+    user.isAdmin = isAdmin;
+
+    // Save the updated user
+    await user.save();
+
+    return res
+      .status(STATUS_CODES.SUCCESS)
+      .json({ message: "User updated successfully", user });
+  } catch (error) {
+    console.error("Error updating user:", error);
+    return res
+      .status(STATUS_CODES.SERVER_ERROR)
+      .json({ message: "Internal Server Error" });
+  }
 });
 
 // @desc Delete a user
 // @route DELETE /users
 // @access Private
 const deleteUser = asyncHandler(async (req, res) => {
-  //   const { id } = req.body;
-  // Confirm data
-  //   if (!id) {
-  //     return res
-  //       .status(STATUS_CODES.BAD_REQUEST)
-  //       .json({ message: "User ID Required" });
-  //   }
-  // Does the user still have assigned notes?
-  //   const note = await Note.findOne({ user: id }).lean().exec();
-  //   if (note) {
-  //     return res
-  //       .status(STATUS_CODES.BAD_REQUEST)
-  //       .json({ message: "User has assigned notes" });
-  //   }
-  // Does the user exist to delete?
-  //   const user = await User.findById(id).exec();
-  //   if (!user) {
-  //     return res
-  //       .status(STATUS_CODES.BAD_REQUEST)
-  //       .json({ message: "User not found" });
-  //   }
-  //   const result = await user.deleteOne();
-  //   const reply = `Username ${result.username} with ID ${result._id} deleted`;
-  //   res.json(reply);
+  const userId = req.body.userId;
+
+  try {
+    // Check if the user exists
+    const user = await db.User.findByPk(userId);
+
+    if (!user) {
+      return res
+        .status(STATUS_CODES.NOT_FOUND)
+        .json({ message: "User not found" });
+    }
+
+    // Delete the user
+    await user.destroy();
+
+    return res
+      .status(STATUS_CODES.SUCCESS)
+      .json({ message: "User deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    return res
+      .status(STATUS_CODES.SERVER_ERROR)
+      .json({ message: "Internal Server Error" });
+  }
+});
+
+const sendEmailVerification = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  // Generate a unique token for email verification
+  const verificationToken = jwt.sign(
+    {
+      email,
+    },
+    process.env.ACCESS_TOKEN_SECRET,
+    { expiresIn: "1d" }
+  );
+
+  const mailOptions = {
+    from: process.env.MY_EMAIL,
+    to: email,
+    subject: "Email Verification",
+    text: `Click the following link to verify your email: http://localhost:3000/api/user/verify-email/${verificationToken}`,
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error("Error sending email:", error);
+      return res.status(500).json({ message: "Internal Server Error" });
+    }
+
+    console.log("Email sent:", info.response);
+    res.status(200).json({ message: "Verification email sent successfully" });
+  });
+});
+
+const verifyEmail = asyncHandler(async (req, res) => {
+  const token = req.params.token;
+  jwt.verify(
+    token,
+    process.env.ACCESS_TOKEN_SECRET,
+    asyncHandler(async (err, decoded) => {
+      if (err)
+        return res
+          .status(STATUS_CODES.FORBIDDEN)
+          .json({ message: "Forbidden" });
+
+      const foundUser = await db.User.findOne({
+        where: {
+          email: decoded.email,
+        },
+      });
+
+      if (!foundUser)
+        return res
+          .status(STATUS_CODES.UNAUTHORIZED)
+          .json({ message: "Unauthorized" });
+
+      foundUser.verified = true;
+      await foundUser.save();
+      res.send(foundUser);
+    })
+  );
 });
 
 module.exports = {
@@ -206,4 +267,6 @@ module.exports = {
   updateUser,
   deleteUser,
   getUserById,
+  sendEmailVerification,
+  verifyEmail,
 };

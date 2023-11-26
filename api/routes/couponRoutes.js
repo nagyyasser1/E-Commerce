@@ -3,10 +3,7 @@ const couponsController = require("../controllers/couponsController");
 
 const router = require("express").Router();
 
-router.use(isAdmin);
-router
-  .route("/")
-  .post(couponsController.addCoupon)
-  .get(couponsController.getAllCoupons);
+router.post("/", isAdmin, couponsController.addCoupon);
+router.get("/", couponsController.getAllCoupons);
 
 module.exports = router;

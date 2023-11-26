@@ -49,7 +49,7 @@ const addCategory = asyncHandler(async (req, res) => {
 // @route GET /category/:categoryId
 // @access Private
 const deleteCategory = asyncHandler(async (req, res) => {
-  const categoryId = req.params.categoryId;
+  const categoryId = req.body.categoryId;
 
   try {
     // Check if the category exists
@@ -68,7 +68,7 @@ const deleteCategory = asyncHandler(async (req, res) => {
   } catch (error) {
     console.error("Error deleting category:", error);
     return res
-      .status(STATUS_CODES.INTERNAL_SERVER_ERROR)
+      .status(STATUS_CODES.SERVER_ERROR)
       .json({ message: "Internal Server Error" });
   }
 });
