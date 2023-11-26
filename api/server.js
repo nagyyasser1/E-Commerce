@@ -32,7 +32,6 @@ app.use("/api/user", require("./routes/userRoutes"));
 app.use("/api/category", require("./routes/categoryRoutes"));
 app.use("/api/manufacturer", require("./routes/manufacturerRoutes"));
 app.use("/api/product", require("./routes/productRoutes"));
-app.use("/api/coupon", require("./routes/couponRoutes"));
 app.use("/api/shippingaddress", require("./routes/shippingAddressRoutes"));
 app.use("/api/review", require("./routes/reviewRoutes"));
 app.use("/api/order", require("./routes/orderRoutes"));

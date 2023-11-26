@@ -20,4 +20,6 @@ router.post(
   productsController.saveFiles
 );
 
+router.put("/:productId", isAdmin, productsController.updateProduct);
+router.delete("/:productId", isAdmin, productsController.deleteProduct);
 module.exports = router;

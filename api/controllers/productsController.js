@@ -1,6 +1,7 @@
 const db = require("../models");
 const asyncHandler = require("express-async-handler");
 const STATUS_CODES = require("../utils/STATUS_CODES");
+const deleteFile = require("../utils/deleteFile");
 const path = require("path");
 
 // @desc Add New product
@@ -97,6 +98,11 @@ const saveFiles = asyncHandler(async (req, res) => {
       .status(STATUS_CODES.CREATED)
       .json({ message: "Product added successfully", product: req.newProduct });
   } catch (error) {
+    await db.Product.destroy({
+      where: {
+        id: req.newProduct.id,
+      },
+    });
     console.error("Error saving files:", error);
     return res
       .status(STATUS_CODES.SERVER_ERROR)
@@ -179,9 +185,100 @@ const getProductById = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc update product basic info
+// @route /product/:productId
+// @access Privite
+const updateProduct = asyncHandler(async (req, res) => {
+  const productId = req.params.productId;
+  const { name, description, price, stockQuantity } = req.body;
+
+  try {
+    // Find the product by ID
+    const product = await db.Product.findByPk(productId);
+
+    // If the product doesn't exist
+    if (!product) {
+      return res
+        .status(STATUS_CODES.NOT_FOUND)
+        .json({ message: "Product not found" });
+    }
+
+    // Update the product details
+    product.name = name || product.name;
+    product.description = description || product.description;
+    product.price = price || product.price;
+    product.stockQuantity = stockQuantity || product.stockQuantity;
+
+    // Save the updated product
+    await product.save();
+
+    res
+      .status(STATUS_CODES.SUCCESS)
+      .json({ message: "Product updated successfully", product });
+  } catch (error) {
+    console.error("Error updating product:", error);
+    res
+      .status(STATUS_CODES.SERVER_ERROR)
+      .json({ message: "Internal Server Error" });
+  }
+});
+
+// @desc delete product
+// @route /product/:productId
+// @access Privite
+const deleteProduct = asyncHandler(async (req, res) => {
+  const productId = req.params.productId;
+
+  try {
+    // Find the product by ID
+    const product = await db.Product.findByPk(productId);
+
+    // If the product doesn't exist
+    if (!product) {
+      return res
+        .status(STATUS_CODES.NOT_FOUND)
+        .json({ message: "Product not found" });
+    }
+
+    // Delete associated images in ProductImage table
+    const productImages = await db.ProductImage.findAll({
+      where: {
+        productId: product.id,
+      },
+    });
+
+    // Define a function to delete an image file
+    const deleteImageFile = async (image) => {
+      await deleteFile(image.imageUrl);
+    };
+
+    // Loop through productImages and delete associated files
+    await Promise.all(productImages.map(deleteImageFile));
+
+    // Delete the product
+    await db.ProductImage.destroy({
+      where: {
+        productId,
+      },
+    });
+    await product.destroy();
+
+    res
+      .status(STATUS_CODES.SUCCESS)
+      .json({ message: "Product deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting product:", error);
+    res
+      .status(STATUS_CODES.SERVER_ERROR)
+      .json({ message: "Internal Server Error" });
+  }
+});
+
 module.exports = {
   addProduct,
   getAllProducts,
   getProductById,
   saveFiles,
+  updateProduct,
+  deleteProduct,
 };

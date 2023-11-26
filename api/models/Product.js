@@ -21,6 +21,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+    isFeatured: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
     createdAt: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
@@ -39,7 +44,10 @@ module.exports = (sequelize, DataTypes) => {
       through: "WishlistProducts",
       foreignKey: "productId",
     });
-    Product.hasMany(models.ProductImage, { foreignKey: "productId" });
+    Product.hasMany(models.ProductImage, {
+      foreignKey: "productId",
+      onDelete: "CASCADE",
+    });
   };
 
   return Product;

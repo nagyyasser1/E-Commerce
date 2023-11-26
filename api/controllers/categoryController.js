@@ -73,7 +73,27 @@ const deleteCategory = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc get all Category
+// @route GET /category
+// @access Private
+const getAllCategories = asyncHandler(async (req, res) => {
+  try {
+    const categories = await db.Category.findAll();
+
+    return res.status(STATUS_CODES.SUCCESS).json({
+      message: "Categories retrieved successfully",
+      categories,
+    });
+  } catch (error) {
+    console.error("Error getting all categories:", error);
+    return res
+      .status(STATUS_CODES.SERVER_ERROR)
+      .json({ message: "Internal Server Error" });
+  }
+});
+
 module.exports = {
   addCategory,
   deleteCategory,
+  getAllCategories,
 };
