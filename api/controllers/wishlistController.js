@@ -85,7 +85,58 @@ const getWishlist = asyncHandler(async (req, res) => {
   }
 });
 
+//
+const deleteProductFromWishlist = asyncHandler(async (req, res) => {
+  const userId = req.user.id;
+  const { productId } = req.body;
+
+  // Check if productId is provided
+  if (!productId) {
+    return res.status(STATUS_CODES.BAD_REQUEST).json({
+      message: "productId is required.",
+    });
+  }
+
+  // Find the user's wishlist
+  const wishlist = await db.Wishlist.findOne({
+    where: {
+      userId,
+    },
+  });
+
+  // Check if the wishlist exists
+  if (!wishlist) {
+    return res.status(STATUS_CODES.NOT_FOUND).json({
+      message: "Wishlist not found.",
+    });
+  }
+
+  // Find the wishlistProduct
+  const wishlistProduct = await db.WishlistProducts.findOne({
+    where: {
+      productId,
+      wishlistId: wishlist.id,
+    },
+  });
+
+  // Check if the wishlistProduct exists
+  if (!wishlistProduct) {
+    return res.status(STATUS_CODES.NOT_FOUND).json({
+      message: "Product not found in the wishlist.",
+    });
+  }
+
+  // Delete the wishlistProduct
+  await wishlistProduct.destroy();
+
+  // Return a success response
+  return res.status(STATUS_CODES.SUCCESS).json({
+    message: "Product deleted from the wishlist successfully.",
+  });
+});
+
 module.exports = {
   addProductToWishlist,
   getWishlist,
+  deleteProductFromWishlist,
 };

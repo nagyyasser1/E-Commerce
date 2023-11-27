@@ -190,7 +190,7 @@ const getProductById = asyncHandler(async (req, res) => {
 // @access Privite
 const updateProduct = asyncHandler(async (req, res) => {
   const productId = req.params.productId;
-  const { name, description, price, stockQuantity } = req.body;
+  const { name, description, price, stockQuantity, isFeatured } = req.body;
 
   try {
     // Find the product by ID
@@ -208,6 +208,7 @@ const updateProduct = asyncHandler(async (req, res) => {
     product.description = description || product.description;
     product.price = price || product.price;
     product.stockQuantity = stockQuantity || product.stockQuantity;
+    product.isFeatured = isFeatured || product.isFeatured;
 
     // Save the updated product
     await product.save();
@@ -274,6 +275,29 @@ const deleteProduct = asyncHandler(async (req, res) => {
   }
 });
 
+const getAllFeaturedProducts = asyncHandler(async (req, res) => {
+  try {
+    const products = await db.Product.findAll({
+      where: {
+        isFeatured: true,
+      },
+      include: [
+        { model: db.Category, as: "Category" },
+        { model: db.Manufacturer, as: "Manufacturer" },
+        { model: db.Review, as: "Reviews" },
+        { model: db.ProductImage, as: "ProductImages" },
+      ],
+    });
+
+    return res.status(STATUS_CODES.SUCCESS).json({ products });
+  } catch (error) {
+    console.error("Error getting all products:", error);
+    return res
+      .status(STATUS_CODES.SERVER_ERROR)
+      .json({ message: "Internal Server Error" });
+  }
+});
+
 module.exports = {
   addProduct,
   getAllProducts,
@@ -281,4 +305,5 @@ module.exports = {
   saveFiles,
   updateProduct,
   deleteProduct,
+  getAllFeaturedProducts,
 };

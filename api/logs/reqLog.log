@@ -248,3 +248,6 @@
 2023/11/26 17:09:26	2021ae9c-e0a5-4fc5-a942-d1b7eb1d7a6c	DELETE	/api/product/20	undefined
 2023/11/26 17:41:29	9bb57436-40ed-4293-9bbb-d895abd9569e	GET	/api/category	undefined
 2023/11/26 17:41:42	8ef0e022-eebf-4aef-9170-45ccf4ff793a	GET	/api/category	undefined
+2023/11/26 18:01:09	6d6d7db0-6f2a-4887-8c00-a9fea15bb839	GET	/api/manufacturer	undefined
+2023/11/26 18:01:21	31a5b1bd-5137-4b49-add3-de6b0ae4b884	GET	/api/manufacturer	undefined
+2023/11/26 18:10:11	462c6472-f91c-457e-bdae-d332946c93f0	GET	/api/product/featured	undefined

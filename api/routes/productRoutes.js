@@ -7,6 +7,7 @@ const fileSizeLimiter = require("../middlewares/fileSizeLimiter");
 const fileExtLimiter = require("../middlewares/fileExtLimiter");
 
 router.get("/", productsController.getAllProducts);
+router.get("/featured", productsController.getAllFeaturedProducts);
 router.get("/:productId", productsController.getProductById);
 
 router.post(
