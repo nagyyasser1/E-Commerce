@@ -22,7 +22,7 @@ if (config.use_env_variable) {
 }
 
 (async () => {
-  await sequelize.sync({ alter: true });
+  await sequelize.sync();
 })();
 
 fs.readdirSync(__dirname)

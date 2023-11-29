@@ -7,7 +7,7 @@ router.post("/", verifyJWT, orderController.addOrder);
 router.get("/myorders", verifyJWT, orderController.getMyOrders);
 router.get("/", isAdmin, orderController.getAllOrders);
 router.put("/", isAdmin, orderController.updateOrderStatus);
-router.put("/cancel/:orderId", verifyJWT, orderController.cancelOrder);
+router.patch("/cancel/:orderId", verifyJWT, orderController.cancelOrder);
 router.delete("/", verifyJWT, orderController.deleteOrder);
 
 module.exports = router;

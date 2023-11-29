@@ -92,8 +92,41 @@ const getAllCategories = asyncHandler(async (req, res) => {
   }
 });
 
+const updateCategory = asyncHandler(async (req, res) => {
+  const { categoryName, description, categoryId } = req.body;
+
+  try {
+    // Check if the category exists
+    const category = await db.Category.findByPk(categoryId);
+
+    if (!category) {
+      return res.status(STATUS_CODES.NOT_FOUND).json({
+        message: "Category not found.",
+      });
+    }
+
+    // Update category properties
+    category.categoryName = categoryName || category.categoryName;
+    category.description = description || category.description;
+
+    // Save the updated category
+    await category.save();
+
+    return res.status(STATUS_CODES.SUCCESS).json({
+      message: "Category updated successfully.",
+      category,
+    });
+  } catch (error) {
+    console.error("Error updating category:", error);
+    return res.status(STATUS_CODES.SERVER_ERROR).json({
+      message: "Internal Server Error",
+    });
+  }
+});
+
 module.exports = {
   addCategory,
   deleteCategory,
   getAllCategories,
+  updateCategory,
 };

@@ -77,19 +77,10 @@ const getUserById = asyncHandler(async (req, res) => {
 // @route POST /users
 // @access Private
 const createNewUser = asyncHandler(async (req, res) => {
-  const { username, email, firstName, lastName, address, phone, password } =
-    req.body;
+  const { email, firstName, lastName, address, phone, password } = req.body;
 
   // Confirm data
-  if (
-    !username ||
-    !password ||
-    !email ||
-    !phone ||
-    !firstName ||
-    !lastName ||
-    !address
-  ) {
+  if (!password || !email || !phone || !firstName || !lastName || !address) {
     return res
       .status(STATUS_CODES.BAD_REQUEST)
       .json({ message: "All fields are required" });
@@ -109,7 +100,6 @@ const createNewUser = asyncHandler(async (req, res) => {
   }
 
   const newUser = db.User.build({
-    username,
     email,
     firstName,
     lastName,
@@ -125,7 +115,7 @@ const createNewUser = asyncHandler(async (req, res) => {
     //created
     res
       .status(STATUS_CODES.SUCCESS)
-      .json({ message: `New user ${username} created`, user: newUser });
+      .json({ message: `New user ${firstName} created`, user: newUser });
   } else {
     res
       .status(STATUS_CODES.BAD_REQUEST)
@@ -136,7 +126,7 @@ const createNewUser = asyncHandler(async (req, res) => {
 // @desc Update a user
 // @route PATCH /users
 // @access Private
-const updateUser = asyncHandler(async (req, res) => {
+const makeUserAdmin = asyncHandler(async (req, res) => {
   const { userId, isAdmin } = req.body;
 
   try {
@@ -264,7 +254,7 @@ const verifyEmail = asyncHandler(async (req, res) => {
 module.exports = {
   getAllUsers,
   createNewUser,
-  updateUser,
+  makeUserAdmin,
   deleteUser,
   getUserById,
   sendEmailVerification,

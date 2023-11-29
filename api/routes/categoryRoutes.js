@@ -7,7 +7,8 @@ router.use(isAdmin);
 router
   .route("/")
   .get(categoryController.getAllCategories)
-  .post(categoryController.addCategory);
+  .post(categoryController.addCategory)
+  .put(categoryController.updateCategory);
 
 router.delete("/:categoryId", categoryController.deleteCategory);
 

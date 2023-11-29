@@ -1,3 +1,17 @@
+/**
+ * @swagger
+ * tags:
+ *    name: Products
+ *    description: the products managing api
+ * /api/product:
+ *   get:
+ *     tags: [Products]
+ *     description: Get all products
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
+
 const router = require("express").Router();
 const isAdmin = require("../middlewares/isAdmin");
 const productsController = require("../controllers/productsController");
@@ -12,7 +26,7 @@ router.get("/:productId", productsController.getProductById);
 
 router.post(
   "/",
-  // isAdmin,
+  isAdmin,
   fileUpload({ createParentPath: true }),
   filePayloadExists,
   fileExtLimiter([".png", ".jpg", ".jpeg"]),
