@@ -75,7 +75,7 @@ const getUserById = asyncHandler(async (req, res) => {
 
 // @desc Create new user
 // @route POST /users
-// @access Private
+// @access Public
 const createNewUser = asyncHandler(async (req, res) => {
   const { email, firstName, lastName, address, phone, password } = req.body;
 
@@ -166,7 +166,7 @@ const makeUserAdmin = asyncHandler(async (req, res) => {
 // @route DELETE /users
 // @access Private
 const deleteUser = asyncHandler(async (req, res) => {
-  const userId = req.body.userId;
+  const { userId } = req.body;
 
   try {
     // Check if the user exists

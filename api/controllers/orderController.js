@@ -1,6 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const db = require("../models");
 const STATUS_CODES = require("../utils/STATUS_CODES");
+const ORDER_STATUS = require("../utils/ORDER_STATUS.JS");
 
 const checkOrderRequirements = async (products) => {
   if (!products || products.length === 0) {
@@ -244,6 +245,7 @@ const deleteOrder = asyncHandler(async (req, res) => {
 const cancelOrder = asyncHandler(async (req, res) => {
   const orderId = req.params.orderId;
   const userId = req.user.id;
+  const { isAdmin } = req.user;
 
   try {
     // Find the order
@@ -270,6 +272,12 @@ const cancelOrder = asyncHandler(async (req, res) => {
     if (!order || !order?.OrderItems) {
       return res.status(STATUS_CODES.NOT_FOUND).json({
         message: "Order not found",
+      });
+    }
+
+    if (order.orderStatus === ORDER_STATUS.SHIPPED && !isAdmin) {
+      return res.status(STATUS_CODES.FORBIDDEN).json({
+        message: "Can't cancel shipped order!",
       });
     }
 

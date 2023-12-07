@@ -1,0 +1,9 @@
+_Https.
+_One way password hashing.
+_OAuth2.
+_Token.
+_Rate limiting.
+_Cross-site scripting (XSS) "valid input data ".
+_POST request.
+_Enforce IP.
+_Credential stuffing. 
