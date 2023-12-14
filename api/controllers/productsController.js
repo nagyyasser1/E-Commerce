@@ -118,18 +118,45 @@ const getAllProducts = asyncHandler(async (req, res) => {
     // Get page and pageSize from the request query, default to 1 and 10 if not provided
     const page = parseInt(req.query.page) || 1;
     const pageSize = parseInt(req.query.pageSize) || 10;
+    const categoryId = parseInt(req.query.categoryId);
+    const searchQuery = req.query.searchQuery;
 
     // Calculate the offset based on the page and pageSize
     const offset = (page - 1) * pageSize;
 
+    // Define the where condition based on stockQuantity, categoryId, and searchQuery
+    const whereCondition = {
+      stockQuantity: {
+        [db.Sequelize.Op.gt]: 0, // Filter for stockQuantity greater than 0
+      },
+    };
+
+    if (categoryId) {
+      whereCondition.categoryId = categoryId;
+    }
+
+    if (searchQuery) {
+      // Add condition to search for products with names containing the searchQuery
+      whereCondition.name = {
+        [db.Sequelize.Op.like]: `%${searchQuery}%`,
+      };
+    }
+
     // Get all products with pagination and include associated fields (category, manufacturer, and reviews)
     const products = await db.Product.findAll({
+      attributes: {
+        exclude: ["categoryId", "manufacturerId", "createdAt", "updatedAt"],
+      },
       include: [
-        { model: db.Category, as: "Category" },
-        { model: db.Manufacturer, as: "Manufacturer" },
-        { model: db.Review, as: "Reviews" },
-        { model: db.ProductImage, as: "ProductImages" },
+        {
+          model: db.ProductImage,
+          as: "ProductImages",
+          attributes: {
+            exclude: ["id", "createdAt", "updatedAt", "productId"],
+          },
+        },
       ],
+      where: whereCondition,
       offset,
       limit: pageSize,
     });
@@ -275,6 +302,9 @@ const deleteProduct = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc get featured product
+// @route /products/featured
+// @access Public
 const getAllFeaturedProducts = asyncHandler(async (req, res) => {
   try {
     const products = await db.Product.findAll({

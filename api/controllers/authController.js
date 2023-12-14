@@ -25,16 +25,16 @@ const login = asyncHandler(async (req, res) => {
 
   if (!foundUser) {
     return res
-      .status(STATUS_CODES.UNAUTHORIZED)
-      .json({ message: "Unauthorized" });
+      .status(STATUS_CODES.NOT_FOUND)
+      .json({ message: "user not found!" });
   }
 
   const match = await bcrypt.compare(password, foundUser.password);
 
   if (!match)
     return res
-      .status(STATUS_CODES.UNAUTHORIZED)
-      .json({ message: "Unauthorized" });
+      .status(STATUS_CODES.BAD_REQUEST)
+      .json({ message: "Email or Password not correct!" });
 
   const accessToken = jwt.sign(
     {

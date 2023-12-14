@@ -13,7 +13,7 @@ router.use(isAdmin);
 
 /**
  * @swagger
- * /api/categories:
+ * /api/category:
  *   get:
  *     tags: [Categories]
  *     description: Get all categories

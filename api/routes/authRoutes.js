@@ -65,7 +65,7 @@ const loginLimiter = require("../middlewares/loginLimiter");
  *                   example: Unauthorized
  */
 
-router.route("/").post(loginLimiter, authController.login);
+router.post("/", loginLimiter, authController.login);
 
 /**
  * @swagger

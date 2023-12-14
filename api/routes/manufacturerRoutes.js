@@ -1,7 +1,7 @@
 const manufacturerController = require("../controllers/manufacturerController");
 const isAdmin = require("../middlewares/isAdmin");
-
 const router = require("express").Router();
+
 /**
  * @swagger
  * tags:
@@ -160,7 +160,6 @@ router.post("/", isAdmin, manufacturerController.addManufacturer);
  *                   type: string
  *                   example: Internal Server Error
  */
-
 router.get("/", isAdmin, manufacturerController.getManufacturer);
 
 /**
@@ -235,7 +234,6 @@ router.get("/", isAdmin, manufacturerController.getManufacturer);
  *                   type: string
  *                   example: "Internal Server Error"
  */
-
 router.delete("/", isAdmin, manufacturerController.deleteManufacturer);
 
 module.exports = router;

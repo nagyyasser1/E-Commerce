@@ -22,12 +22,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+// Serve statatic files on specific path
+app.use("/", express.static(path.join(__dirname, "uploads")));
+
 // Api routes
-app.use("/", express.static(path.join(__dirname, "uploads"))); // Serve statatic files
 app.use("/", require("./routes/route")); // Api welcome page
-app.use("/auth", require("./routes/authRoutes")); // Handle authentication
-app.use("/contact", require("./routes/contactRoutes")); // Mangage Messages via Email
+app.use("/auth", require("./routes/authRoutes")); // Handle Authentication
 app.use("/api", require("./routes/apiRoutes")); // E-commerce endpoints
+app.use("/contact", require("./routes/contactRoutes")); // Mangage Messages via Email
 
 // Swagger documentaion
 const specs = swaggerJsDoc(swaggerOpt);

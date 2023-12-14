@@ -8,11 +8,32 @@ const fileExtLimiter = require("../middlewares/fileExtLimiter");
 
 /**
  * @swagger
- * /api/product:
+ * /api/products:
  *   get:
  *     tags: [Products]
  *     description: Get all products
  *     summary: Get all products
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: pageSize
+ *         schema:
+ *           type: integer
+ *         description: Number of items per page
+ *       - in: query
+ *         name: categoryId
+ *         schema:
+ *           type: integer
+ *         description: Filter products by category ID
+ *       - in: query
+ *         name: searchQuery
+ *         schema:
+ *           type: string
+ *         description: Search products by name
  *     responses:
  *       200:
  *         description: Successful response
@@ -20,29 +41,31 @@ const fileExtLimiter = require("../middlewares/fileExtLimiter");
  *           application/json:
  *             example:
  *               message: Products retrieved successfully
- *               products:
- *                 - id: 1
- *                   name: Product1
- *                   description: Product description 1
- *                   price: 19.99
- *                   category: { id: 1, name: "Category1" }
- *                   manufacturer: { id: 1, name: "Manufacturer1" }
- *                   reviews: [{ id: 1, rating: 4, comment: "Good product" }]
- *                   productImages: [{ id: 1, url: "image1.jpg" }]
- *                 - id: 2
- *                   name: Product2
- *                   description: Product description 2
- *                   price: 29.99
- *                   category: { id: 2, name: "Category2" }
- *                   manufacturer: { id: 2, name: "Manufacturer2" }
- *                   reviews: [{ id: 2, rating: 5, comment: "Excellent product" }]
- *                   productImages: [{ id: 2, url: "image2.jpg" }]
+ *               data:
+ *                 products:
+ *                   - id: 1
+ *                     name: Product1
+ *                     description: Product description 1
+ *                     price: 19.99
+ *                     category: { id: 1, name: "Category1" }
+ *                     manufacturer: { id: 1, name: "Manufacturer1" }
+ *                     reviews: [{ id: 1, rating: 4, comment: "Good product" }]
+ *                     productImages: [{ id: 1, url: "image1.jpg" }]
+ *                   - id: 2
+ *                     name: Product2
+ *                     description: Product description 2
+ *                     price: 29.99
+ *                     category: { id: 2, name: "Category2" }
+ *                     manufacturer: { id: 2, name: "Manufacturer2" }
+ *                     reviews: [{ id: 2, rating: 5, comment: "Excellent product" }]
+ *                     productImages: [{ id: 2, url: "image2.jpg" }]
  */
+
 router.get("/", productsController.getAllProducts);
 
 /**
  * @swagger
- * /api/product/featured:
+ * /api/products/featured:
  *   get:
  *     tags: [Products]
  *     description: Get all featured products

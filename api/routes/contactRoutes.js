@@ -1,5 +1,6 @@
 const transporter = require("../config/transporter");
 const verifyJWT = require("../middlewares/verifyJWT");
+const STATUS_CODES = require("../utils/STATUS_CODES");
 
 const router = require("express").Router();
 
@@ -65,6 +66,11 @@ router.post("/", verifyJWT, (req, res) => {
   // Extract data from the request body
   const { name, email, message } = req.body;
 
+  if (!name || !email || !message) {
+    return res
+      .status(STATUS_CODES.BAD_REQUEST)
+      .json({ message: "All fileds are required!" });
+  }
   // Set up email options
   const mailOptions = {
     from: email,
