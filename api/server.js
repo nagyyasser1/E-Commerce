@@ -45,3 +45,15 @@ db.sequelize.sync().then(() => {
     console.log(`server runing on port ${PORT}`);
   });
 });
+
+// Catch unhandled exceptions
+process.on("uncaughtException", (err) => {
+  console.error(`Uncaught Exception: ${err}`);
+  process.exit(1);
+});
+
+// Catch unhandled promise rejections
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("Unhandled Rejection at:", promise, "reason:", reason);
+  process.exit(1);
+});
