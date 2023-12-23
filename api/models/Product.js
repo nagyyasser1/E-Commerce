@@ -1,11 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
   const Product = sequelize.define("Product", {
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true,
-      allowNull: false,
-    },
     name: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -36,6 +30,7 @@ module.exports = (sequelize, DataTypes) => {
     },
   });
 
+  // Define associations
   Product.associate = (models) => {
     Product.belongsTo(models.Category, { foreignKey: "categoryId" });
     Product.belongsTo(models.Manufacturer, { foreignKey: "manufacturerId" });
@@ -47,6 +42,13 @@ module.exports = (sequelize, DataTypes) => {
     Product.hasMany(models.ProductImage, {
       foreignKey: "productId",
       onDelete: "CASCADE",
+    });
+
+    Product.belongsToMany(models.Size, {
+      through: models.ProductSize,
+      foreignKey: {
+        allowNull: false,
+      },
     });
   };
 

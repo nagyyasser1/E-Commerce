@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
   ProductImage.associate = (models) => {
     ProductImage.belongsTo(models.Product, {
       foreignKey: "productId",
-      onDelete: "CASCADE", // This line adds the ON DELETE CASCADE behavior
+      onDelete: "CASCADE",
     });
   };
 
